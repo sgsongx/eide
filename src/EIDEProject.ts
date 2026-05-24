@@ -2390,7 +2390,10 @@ $(OUT_DIR):
                     .replace(/\.\.\//g, '')
                     .replace(/\.\//g, ''); // globmatch bug ? it can't parse path which have '.' or '..'
                 if (globmatch.isMatch(searchPath, expr)) {
-                    const val = patterns[expr]?.replace(/\r\n|\n/g, ' ').replace(/\\r|\\n|\\t/g, ' ').trim();
+                    let val = patterns[expr];
+                    if (val !== undefined && val !== null) {
+                        val = val.toString().replace(/\r\n|\n/g, ' ').replace(/\\r|\\n|\\t/g, ' ').trim();
+                    }
                     if (val) {
                         if (extraArgs[expr]) {
                             extraArgs[expr] = extraArgs[expr] + ' ' + val;
@@ -2407,7 +2410,10 @@ $(OUT_DIR):
             for (const expr in patterns) {
                 const searchPath = virtpath.trim();
                 if (globmatch.isMatch(searchPath, expr)) {
-                    const val = patterns[expr]?.replace(/\r\n|\n/g, ' ').replace(/\\r|\\n|\\t/g, ' ').trim();
+                    let val = patterns[expr];
+                    if (val !== undefined && val !== null) {
+                        val = val.toString().replace(/\r\n|\n/g, ' ').replace(/\\r|\\n|\\t/g, ' ').trim();
+                    }
                     if (val) {
                         if (extraArgs[expr]) {
                             extraArgs[expr] = extraArgs[expr] + ' ' + val;
@@ -2458,7 +2464,10 @@ $(OUT_DIR):
                 for (const expr in patterns) {
                     const searchPath = folderpath.trim();
                     if (globmatch.isMatch(searchPath, expr) || searchPath == expr.replace(/\/\*\*$/, '').replace(/\/\*$/, '')) {
-                        const val = patterns[expr]?.replace(/\r\n|\n/g, ' ').replace(/\\r|\\n|\\t/g, ' ').trim();
+                        let val = patterns[expr];
+                        if (val !== undefined && val !== null) {
+                            val = val.toString().replace(/\r\n|\n/g, ' ').replace(/\\r|\\n|\\t/g, ' ').trim();
+                        }
                         if (callbk) {
                             if (callbk(expr, searchPath, val))
                                 return;
@@ -2474,7 +2483,10 @@ $(OUT_DIR):
                         .replace(/\.\.\//g, '')
                         .replace(/\.\//g, ''); // globmatch bug ? it can't parse path which have '.' or '..'
                     if (globmatch.isMatch(searchPath, expr) || searchPath == expr.replace(/\/\*\*$/, '').replace(/\/\*$/, '')) {
-                        const val = patterns[expr]?.replace(/\r\n|\n/g, ' ').replace(/\\r|\\n|\\t/g, ' ').trim();
+                        let val = patterns[expr];
+                        if (val !== undefined && val !== null) {
+                            val = val.toString().replace(/\r\n|\n/g, ' ').replace(/\\r|\\n|\\t/g, ' ').trim();
+                        }
                         if (callbk) {
                             if (callbk(expr, searchPath, val))
                                 return;
