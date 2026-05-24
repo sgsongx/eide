@@ -14,21 +14,21 @@
 		{
 			"label": "build vsix",
 			"type": "shell",
-			"command": "vsce package",
+			"command": "npx @vscode/vsce package",
 			"problemMatcher": [],
 			"group": "build"
 		},
 		{
 			"label": "publish app",
 			"type": "shell",
-			"command": "vsce publish",
+			"command": "npx @vscode/vsce publish",
 			"problemMatcher": [],
 			"group": "build"
 		},
 		{
 			"label": "publish pre-release app",
 			"type": "shell",
-			"command": "vsce publish --pre-release",
+			"command": "npx @vscode/vsce publish --pre-release",
 			"problemMatcher": [],
 			"group": "build"
 		}
