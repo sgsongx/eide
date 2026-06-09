@@ -5,7 +5,6 @@ import * as fs from 'fs';
 import * as vscode from 'vscode';
 import * as NodePath from 'path';
 import { jsonc } from 'jsonc';
-import { isNullOrUndefined } from "util";
 import * as child_process from 'child_process';
 
 import { File } from "../lib/node-utility/File";
@@ -379,7 +378,7 @@ export abstract class ConfigModel<DataType> {
 
             // set default value
             for (const key in _default) {
-                if (!isNullOrUndefined(_default[key])) {
+                if (_default[key] != null) {
                     if (typeof (<any>newConfig)[key] !== typeof _default[key]) {
                         (<any>newConfig)[key] = _default[key];
                     }
