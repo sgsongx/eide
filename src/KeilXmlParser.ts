@@ -220,7 +220,8 @@ export abstract class KeilParser<T> {
     // example: file: 'c:\aa\bb', path: '../cc/f.txt', result: 'c:\aa\cc\f.txt'
     protected ToAbsolutePath(path: string): string {
         if (File.isAbsolute(path)) {
-            return path.replace(/\//g, '\\');
+            // use forward slashes to avoid YAML escape sequence issues with \r, \t, \n etc.
+            return File.normalize(path).replace(/\\/g, '/');
         } else {
             return File.normalize(this._file.dir + File.sep + path);
         }

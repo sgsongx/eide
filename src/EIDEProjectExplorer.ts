@@ -2496,9 +2496,9 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const optLi = [];
                         fopts.includes.forEach(item => {
                             if (keilTarget.type === 'C51') {
-                                optLi.push(`INCDIR(${baseInfo.rootFolder.ToRelativePath(item) || item})`);
+                                optLi.push(`INCDIR(${baseInfo.rootFolder.ToRelativePath(item) || File.ToUnixPath(item)})`);
                             } else {
-                                optLi.push(`-I${baseInfo.rootFolder.ToRelativePath(item) || item}`);
+                                optLi.push(`-I${baseInfo.rootFolder.ToRelativePath(item) || File.ToUnixPath(item)}`);
                             }
                         });
                         fopts.defines.forEach(item => {
@@ -2588,7 +2588,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const incText = getFirst(c_fopts.IncludePath);
                         if (incText && typeof incText === 'string') {
                             incText.split(';').map((s: string) => s.trim()).filter((s: string) => s).forEach((s: string) => {
-                                const rep = baseInfo.rootFolder.ToRelativePath(s) || s;
+                                const rep = baseInfo.rootFolder.ToRelativePath(s) || File.ToUnixPath(s);
                                 if (keilTarget.type === 'C51') optLi.push(`INCDIR(${rep})`);
                                 else optLi.push(`-I${rep}`);
                             });
@@ -2611,7 +2611,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const miscText = getFirst(c_fopts.MiscControls);
                         if (miscText && typeof miscText === 'string') {
                             const replMisc = miscText.replace(/(-imacros|-include)\s+([^\s]+)/g, (match: string, p1: string, p2: string) => {
-                                const relp = baseInfo.rootFolder.ToRelativePath(p2) || p2;
+                                const relp = baseInfo.rootFolder.ToRelativePath(p2) || File.ToUnixPath(p2);
                                 return `${p1} ${relp}`;
                             });
                             optLi.push(replMisc.trim());
@@ -2631,7 +2631,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const incText = getFirst(a_fopts.IncludePath);
                         if (incText && typeof incText === 'string') {
                             incText.split(';').map((s: string) => s.trim()).filter((s: string) => s).forEach((s: string) => {
-                                optLi.push(`-I${baseInfo.rootFolder.ToRelativePath(s) || s}`);
+                                optLi.push(`-I${baseInfo.rootFolder.ToRelativePath(s) || File.ToUnixPath(s)}`);
                             });
                         }
                         const defText = getFirst(a_fopts.Define);
@@ -2643,7 +2643,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const miscText = getFirst(a_fopts.MiscControls);
                         if (miscText && typeof miscText === 'string') {
                             const replMisc = miscText.replace(/(-imacros|-include)\s+([^\s]+)/g, (match: string, p1: string, p2: string) => {
-                                const relp = baseInfo.rootFolder.ToRelativePath(p2) || p2;
+                                const relp = baseInfo.rootFolder.ToRelativePath(p2) || File.ToUnixPath(p2);
                                 return `${p1} ${relp}`;
                             });
                             optLi.push(replMisc.trim());
