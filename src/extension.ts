@@ -2465,8 +2465,8 @@ class ExternalDebugConfigProvider implements vscode.DebugConfigurationProvider {
 
 async function startDebugging(viewItem?: ProjTreeItem, attach?: boolean) {
 
-    const prj = viewItem 
-        ? projectExplorer.getProjectByTreeItem(viewItem) 
+    const prj = viewItem instanceof ProjTreeItem
+        ? projectExplorer.getProjectByTreeItem(viewItem)
         : projectExplorer.getActiveProject();
     if (!prj) {
         GlobalEvent.show_msgbox('Warning', `No actived project to debug.`);
@@ -2481,30 +2481,40 @@ async function startDebugging(viewItem?: ProjTreeItem, attach?: boolean) {
 
     const provider = new ExternalDebugConfigProvider(undefined, prj);
     let cfgs = await provider.provideDebugConfigurations(vscWorkspaceFolder);
-    if (!cfgs)
+    if (!cfgs || cfgs.length === 0) {
+        GlobalEvent.show_msgbox('Warning', `No debug configurations available for this project.`);
         return;
+    }
 
     if (attach)
         cfgs = cfgs.filter(cfg => cfg.request === 'attach');
     else
         cfgs = cfgs.filter(cfg => cfg.request === 'launch');
 
-    const debuggerId = prj.getTargetInfo().settings.debugger || 'unknown';
-    cfgs = cfgs.filter(cfg => utility.DEBUGGER_MAPS[debuggerId].types.includes(cfg.type));
-
-    if (cfgs.length > 0) {
-        let cfg = cfgs[0];
-        if (cfgs.length > 1) {
-            const val = await vscode.window.showQuickPick(cfgs.map(e => e.name), {
-                placeHolder: 'Select a debug configuration'
-            });
-            if (val == undefined)
-                return; // user canceled
-            const idx = cfgs.findIndex(v => v.name === val);
-            cfg = cfgs[idx];
-        }
-        await vscode.debug.startDebugging(vscWorkspaceFolder, cfg);
+    const debuggerId = prj.getTargetInfo()?.settings?.debugger || 'unknown';
+    if (utility.DEBUGGER_MAPS[debuggerId]) {
+        cfgs = cfgs.filter(cfg => utility.DEBUGGER_MAPS[debuggerId].types.includes(cfg.type));
     }
+
+    if (cfgs.length === 0) {
+        const dbgName = utility.DEBUGGER_MAPS[debuggerId]?.name || debuggerId;
+        GlobalEvent.show_msgbox('Warning',
+            `No matching debug configuration found.\n` +
+            `Debugger: ${dbgName}, Request: ${attach ? 'attach' : 'launch'}`);
+        return;
+    }
+
+    let cfg = cfgs[0];
+    if (cfgs.length > 1) {
+        const val = await vscode.window.showQuickPick(cfgs.map(e => e.name), {
+            placeHolder: 'Select a debug configuration'
+        });
+        if (val == undefined)
+            return; // user canceled
+        const idx = cfgs.findIndex(v => v.name === val);
+        cfg = cfgs[idx];
+    }
+    await vscode.debug.startDebugging(vscWorkspaceFolder, cfg);
 }
 
 class CompilerLogCodeActionProvider implements vscode.CodeActionProvider {
