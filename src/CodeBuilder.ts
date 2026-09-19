@@ -405,7 +405,7 @@ export abstract class CodeBuilder {
             incDirs: this.getIncludeDirs().map(p => this.project.toRelativePath(p)),
             libDirs: this.getLibDirs().map(p => this.project.toRelativePath(p)),
             defines: this.getProjectCMacroList(),
-            sourceList: sourceInfo.sources.sort(),
+            sourceList: sourceInfo.sources,
             alwaysInBuildSources: sourceInfo.alwaysBuildSourceFiles,
             sourceParams: sourceInfo.params,
             options: JSON.parse(JSON.stringify(compileOptions)),

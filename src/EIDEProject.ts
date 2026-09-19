@@ -188,7 +188,8 @@ export class VirtualSource implements SourceProvider {
         while (folderStack.length > 0) {
             curFolder = <any>folderStack.pop();
             func(curFolder);
-            for (const vFolder of curFolder.folder.folders) {
+            for (let i = curFolder.folder.folders.length - 1; i >= 0; i--) {
+                const vFolder = curFolder.folder.folders[i];
                 folderStack.push({
                     path: `${curFolder.path}/${vFolder.name}`,
                     folder: vFolder
