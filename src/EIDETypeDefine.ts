@@ -1440,6 +1440,10 @@ export class ProjectConfiguration<T extends BuilderConfigData>
 
     protected parse<T extends BuilderConfigData>(str: string): ProjectConfigData<T> {
         const cfg: ProjectConfigData<T> = ProjectConfiguration.parseProjectFile(str);
+        const workspaceRoot = new File(NodePath.dirname(this.cfgFile.dir));
+        this.rootDir = cfg.miscInfo?.keilPrjDir
+            ? new File(File.normalize(NodePath.resolve(workspaceRoot.path, cfg.miscInfo.keilPrjDir)))
+            : workspaceRoot;
         for (const key in cfg.targets) {
             const target = cfg.targets[key];
             target.builderOptions = {};

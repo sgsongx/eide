@@ -804,9 +804,10 @@ class ARMParser extends KeilParser<KeilARMOption> {
                     .replace(/%P\b/g, this._file.name)
                     .replace(/#H\b/g, () => '${KEIL_OUTPUT_DIR}\\${KEIL_OUTPUT_NAME}.hex')
                     .replace(/#L\b/g, () => '${KEIL_OUTPUT_DIR}\\${KEIL_OUTPUT_NAME}.axf')
-                    .replace(/#P\b/g, this._file.path)
+                    .replace(/#P\b/g, () => `.\\${this._file.name}`)
                     .replace(/@(H|L)\b/g, () => '${KEIL_OUTPUT_NAME}')
                     .replace(/\$(H|L)\b/g, () => '${KEIL_OUTPUT_DIR}\\')
+                    .replace(/\$P\b/g, () => '.\\')
                     .replace(/\$J\b/g, () => '${ToolchainRoot}\\include\\')
                     .replace(/\$K\b/g, () => '${ToolchainRoot}\\')
                     .replace(/\!H\b/g, () => '${KEIL_OUTPUT_DIR}\\${KEIL_OUTPUT_NAME}.hex')
@@ -852,7 +853,7 @@ class ARMParser extends KeilParser<KeilARMOption> {
                         // Copy files to compate Keil User Commands
                         const copyFilesCmd = {
                             "name": '[Copy linker output for Keil User Commands]',
-                            "command": `$<cd:mdk-proj-dir> && mkdir \${KEIL_OUTPUT_DIR} & copy "\${OutDir}\\\${ProjectName}.axf" "\${KEIL_OUTPUT_DIR}\\\${KEIL_OUTPUT_NAME}.axf"`,
+                            "command": `$<cd:mdk-proj-dir> && mkdir \${KEIL_OUTPUT_DIR} & copy "\${ExecutableName}.axf" "\${KEIL_OUTPUT_DIR}\\\${KEIL_OUTPUT_NAME}.axf"`,
                             "disable": actived_cnt == 0,
                             "abortAfterFailed": true
                         };

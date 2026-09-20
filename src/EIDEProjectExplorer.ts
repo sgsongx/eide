@@ -2423,6 +2423,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
     private async ImportKeilProject(option: ImportOptions) {
 
         const keilPrjFile = option.projectFile;
+        const keilPrjDir = new File(keilPrjFile.dir);
         const keilParser = KeilParser.NewInstance(option.projectFile, <any>option.mdk_prod);
         const targets = keilParser.ParseData();
 
@@ -2496,9 +2497,9 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const optLi = [];
                         fopts.includes.forEach(item => {
                             if (keilTarget.type === 'C51') {
-                                optLi.push(`INCDIR(${baseInfo.rootFolder.ToRelativePath(item) || File.ToUnixPath(item)})`);
+                                optLi.push(`INCDIR(${keilPrjDir.ToRelativePath(item) || File.ToUnixPath(item)})`);
                             } else {
-                                optLi.push(`-I${baseInfo.rootFolder.ToRelativePath(item) || File.ToUnixPath(item)}`);
+                                optLi.push(`-I${keilPrjDir.ToRelativePath(item) || File.ToUnixPath(item)}`);
                             }
                         });
                         fopts.defines.forEach(item => {
@@ -2588,7 +2589,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const incText = getFirst(c_fopts.IncludePath);
                         if (incText && typeof incText === 'string') {
                             incText.split(';').map((s: string) => s.trim()).filter((s: string) => s).forEach((s: string) => {
-                                const rep = baseInfo.rootFolder.ToRelativePath(s) || File.ToUnixPath(s);
+                                const rep = keilPrjDir.ToRelativePath(s) || File.ToUnixPath(s);
                                 if (keilTarget.type === 'C51') optLi.push(`INCDIR(${rep})`);
                                 else optLi.push(`-I${rep}`);
                             });
@@ -2611,7 +2612,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const miscText = getFirst(c_fopts.MiscControls);
                         if (miscText && typeof miscText === 'string') {
                             const replMisc = miscText.replace(/(-imacros|-include)\s+([^\s]+)/g, (match: string, p1: string, p2: string) => {
-                                const relp = baseInfo.rootFolder.ToRelativePath(p2) || File.ToUnixPath(p2);
+                                const relp = keilPrjDir.ToRelativePath(p2) || File.ToUnixPath(p2);
                                 return `${p1} ${relp}`;
                             });
                             optLi.push(replMisc.trim());
@@ -2631,7 +2632,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const incText = getFirst(a_fopts.IncludePath);
                         if (incText && typeof incText === 'string') {
                             incText.split(';').map((s: string) => s.trim()).filter((s: string) => s).forEach((s: string) => {
-                                optLi.push(`-I${baseInfo.rootFolder.ToRelativePath(s) || File.ToUnixPath(s)}`);
+                                optLi.push(`-I${keilPrjDir.ToRelativePath(s) || File.ToUnixPath(s)}`);
                             });
                         }
                         const defText = getFirst(a_fopts.Define);
@@ -2643,7 +2644,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         const miscText = getFirst(a_fopts.MiscControls);
                         if (miscText && typeof miscText === 'string') {
                             const replMisc = miscText.replace(/(-imacros|-include)\s+([^\s]+)/g, (match: string, p1: string, p2: string) => {
-                                const relp = baseInfo.rootFolder.ToRelativePath(p2) || File.ToUnixPath(p2);
+                                const relp = keilPrjDir.ToRelativePath(p2) || File.ToUnixPath(p2);
                                 return `${p1} ${relp}`;
                             });
                             optLi.push(replMisc.trim());
@@ -2665,7 +2666,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
             group.files.forEach((fileItem) => {
                 // add source file
                 VFolder.files.push({
-                    path: baseInfo.rootFolder.ToRelativePath(fileItem.file.path) || fileItem.file.path
+                    path: keilPrjDir.ToRelativePath(fileItem.file.path) || fileItem.file.path
                 });
                 // add file options for every target
                 setupSourceOpts(vPath, fileItem.file.path);
@@ -2716,7 +2717,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                         continue;
                     }
 
-                    const srcRePath = baseInfo.rootFolder.ToRelativePath(srcPath);
+                    const srcRePath = keilPrjDir.ToRelativePath(srcPath);
 
                     /* add to project */
                     vFolder.files.push({ path: srcRePath || srcPath });
@@ -2724,7 +2725,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                     /* if it's a header, add to include path */
                     if (dep.category == 'header') {
                         if (srcRePath)
-                            incs.push(`${baseInfo.rootFolder.path}${File.sep}${NodePath.dirname(srcRePath)}`);
+                            incs.push(`${keilPrjDir.path}${File.sep}${NodePath.dirname(srcRePath)}`);
                         else
                             incs.push(NodePath.dirname(srcPath));
                     }
@@ -2754,7 +2755,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
 
                     let locate = dep.packPath;
                     if (dep.instance) {
-                        locate = baseInfo.rootFolder
+                        locate = keilPrjDir
                             .ToRelativePath(dep.instance[0]) || dep.instance[0]
                     }
 
@@ -2797,19 +2798,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
         }
 
         const replaceUserTaskTmpVar = (t: any) => {
-            const reKeilPrjDir = baseInfo.rootFolder.ToRelativeLocalPath(keilPrjFile.dir) || keilPrjFile.dir;
-            if (reKeilPrjDir === '.') {
-                t.command = t.command.replace('$<cd:mdk-proj-dir> && ', '');
-            } else {
-                if (t.command.startsWith('bash')) {
-                    t.command = t.command.replace('$<cd:mdk-proj-dir>', `cd ${File.ToUnixPath(reKeilPrjDir)}`);
-                } else {
-                    if (File.isAbsolute(reKeilPrjDir))
-                        t.command = t.command.replace('$<cd:mdk-proj-dir>', `cd /D ${reKeilPrjDir}`);
-                    else
-                        t.command = t.command.replace('$<cd:mdk-proj-dir>', `cd .\\${reKeilPrjDir}`);
-                }
-            }
+            t.command = t.command.replace('$<cd:mdk-proj-dir> && ', '');
         }
 
         // project env
@@ -2841,7 +2830,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
                 const toolchain = ToolchainManager.getInstance().getToolchain('C51', 'Keil_C51');
                 if (keilCompileConf.includeFolder) {
                     const absPath = [toolchain.getToolchainDir().path, 'INC', keilCompileConf.includeFolder].join(File.sep);
-                    defIncList.push(baseInfo.rootFolder.ToRelativePath(absPath) || absPath);
+                    defIncList.push(keilPrjDir.ToRelativePath(absPath) || absPath);
                 }
                 // import builder options
                 const opts: BuilderOptions = mergeBuilderOpts(
@@ -2862,7 +2851,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
 
                 if (keilCompileConf.scatterFilePath) {
                     prjCompileOption.scatterFilePath =
-                        baseInfo.rootFolder.ToRelativePath(keilCompileConf.scatterFilePath) || keilCompileConf.scatterFilePath;
+                        keilPrjDir.ToRelativePath(keilCompileConf.scatterFilePath) || keilCompileConf.scatterFilePath;
                 } else { // if no scatter, will use X/O Base, R/O Base options, make scatterFilePath empty
                     prjCompileOption.scatterFilePath = '';
                 }
@@ -2878,7 +2867,7 @@ class ProjectDataProvider implements vscode.TreeDataProvider<ProjTreeItem>, vsco
 
             // init custom dependence after specific configs done
             newTarget.cppPreprocessAttrs = <any>{ name: 'default' };
-            const incList = keilTarget.incList.map((path) => baseInfo.rootFolder.ToRelativePath(path) || path);
+            const incList = keilTarget.incList.map((path) => keilPrjDir.ToRelativePath(path) || path);
             newTarget.cppPreprocessAttrs.incList = defIncList.concat(incList);
             newTarget.cppPreprocessAttrs.defineList = keilTarget.defineList;
             newTarget.cppPreprocessAttrs.libList = [];
