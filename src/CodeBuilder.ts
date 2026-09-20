@@ -297,7 +297,16 @@ export abstract class CodeBuilder {
             this.lockWatcher.OnChanged = () => {
                 this.lockWatcher?.Close();
                 const builderLogFile = File.from(outDir, 'unify_builder.log');
-                setTimeout(() => this.emit('finished', checkBuildDone(builderLogFile)), 500);
+                setTimeout(() => {
+                    const compilerDbFile = File.from(outDir, 'compile_commands.json');
+                    try {
+                        if (compilerDbFile.IsFile())
+                            compilerDbFile.Write(JSON.stringify(JSON.parse(compilerDbFile.Read()), undefined, 1) + os.EOL);
+                    } catch (error) {
+                        GlobalEvent.log_warn(error);
+                    }
+                    this.emit('finished', checkBuildDone(builderLogFile));
+                }, 500);
             };
 
             // start watch
